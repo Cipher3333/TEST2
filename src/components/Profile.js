@@ -7,17 +7,22 @@ const Profile = () => {
   const [userData, setUserData] = useState(null);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const db = firebase.firestore();
-      const data = await db.collection("users").doc(username).get();
-      if (data.exists) {
-        setUserData(data.data());
+    const db = firebase.database();
+    const userRef = db.ref("users/" + username);
+
+    userRef.on("value", (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        setUserData(data);
       } else {
         const user = firebase.auth().currentUser;
         setUserData({ username: user.displayName, userId: user.uid });
       }
+    });
+
+    return () => {
+      userRef.off();
     };
-    fetchData();
   }, [username]);
 
   if (!userData) {
