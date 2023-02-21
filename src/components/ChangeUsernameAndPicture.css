@@ -1,0 +1,30 @@
+.change-username-and-picture {
+  display: inline-block;
+  justify-Content: center;
+  align-Items: center;
+  padding: center;
+  position: absolute;
+}
+label {
+  font-weight: bold;
+  margin-bottom: 10px;
+  align-items: center;
+  padding: center;
+  justify-content: center;
+  position: relative;
+}
+input[type="text"],
+input[type="file"] {
+  margin-bottom: 20px;
+  padding: 10px;
+  border-radius: 5px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid gray;
+  position: relative;
+}
+body {
+  overflow: hidden;
+}
+
+
