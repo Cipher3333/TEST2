@@ -24,7 +24,18 @@ const ChatMessage = ({ message }) => {
   };
 
   const tagRegex = /@(\w+)/g;
-  const taggedText = detectLink(text.replace(tagRegex, '<a href="/profile/$1" style="color: blue;">@$1</a>'));
+  const taggedText = detectLink(text.replace(tagRegex, (match, username) => {
+    const userRef = firebase.database().ref(`users`).orderByChild('username').equalTo(username);
+    userRef.once('value').then(snapshot => {
+      const exists = snapshot.exists();
+      if (exists) {
+        return `<a href="/profile/${username}" style="color: blue;">@${username}</a>`;
+      } else {
+        return `@${username}`;
+      }
+    });
+  }));
+
   const usernameClass = messageClass === 'sent' ? 'username-sent' : 'username-received';
 
   return (
