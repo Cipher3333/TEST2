@@ -1,21 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import firebase from 'firebase/app';
 
 const ChatMessage = ({ message }) => {
   const { text, uid } = message;
   const messageClass = uid === firebase.auth().currentUser.uid ? 'sent' : 'received';
 
-  const [username, setUsername] = useState(null);
-  useEffect(() => {
-    firebase.database().ref(`users/${uid}/username`).once('value')
-      .then(snapshot => {
-        const data = snapshot.val();
-        if (data) {
-          setUsername(data);
-        } else {
-          setUsername(firebase.auth().displayName);
-        }
-      });
+  const [username, setUsername] = React.useState(null);
+  React.useEffect(() => {
+    firebase.database().ref('users/' + uid + '/username').once('value').then((snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        setUsername(data);
+      } else {
+        setUsername(firebase.auth().displayName);
+      }
+    });
   }, [uid]);
 
   const detectLink = text => {
