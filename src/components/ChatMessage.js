@@ -1,51 +1,61 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import firebase from 'firebase/app';
 
 const ChatMessage = ({ message }) => {
   const { text, uid } = message;
   const messageClass = uid === firebase.auth().currentUser.uid ? 'sent' : 'received';
 
-  const [username, setUsername] = React.useState(null);
-  React.useEffect(() => {
-    firebase.database().ref('users/' + uid + '/username').once('value').then((snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        setUsername(data);
+  const [username, setUsername] = useState(null);
+  const [taggedText, setTaggedText] = useState(null);
+  useEffect(() => {
+    const fetchUsernameAndTaggedText = async () => {
+      const usernameSnapshot = await firebase.database().ref(`users/${uid}/username`).once('value');
+      const usernameData = usernameSnapshot.val();
+      if (usernameData) {
+        setUsername(usernameData);
       } else {
         setUsername(firebase.auth().displayName);
       }
-    });
-  }, [uid]);
 
-  const detectLink = text => {
-    const reg = /(https?:\/\/[^\s]+)/g;
-    return text.replace(reg, '<a href="$1" style="color: blue;">$1</a>');
-  };
-
-  const tagRegex = /@(\w+)/g;
-  const taggedText = detectLink(text.replace(tagRegex, (match, username) => {
-    const userRef = firebase.database().ref(`users`).orderByChild('username').equalTo(username);
-    userRef.once('value').then(snapshot => {
-      const exists = snapshot.exists();
-      if (exists) {
-        return `<a href="/profile/${username}" style="color: blue;">@${username}</a>`;
+      const tagRegex = /@([\w\s]+)/g;
+      const matches = text.match(tagRegex);
+      if (matches) {
+        const replacedMatches = await Promise.all(matches.map(async (match) => {
+          const username = match.substring(1);
+          const userRef = firebase.database().ref(`users`).orderByChild('username').equalTo(username);
+          const snapshot = await userRef.once('value');
+          const exists = snapshot.exists();
+          console.log(`Username: ${username}, Exists: ${exists}`);
+          if (exists) {
+            return `<a href="/profile/${username}" style="color: blue;">@${username}</a>`;
+          } else {
+            return `@${username}`;
+          }
+        }));
+        let currentIndex = 0;
+        const newTaggedText = text.replace(tagRegex, () => replacedMatches[currentIndex++]);
+        setTaggedText(newTaggedText);
       } else {
-        return `@${username}`;
+        setTaggedText(text);
       }
-    });
-  }));
+    };
+
+    fetchUsernameAndTaggedText();
+  }, [uid, text]);
 
   const usernameClass = messageClass === 'sent' ? 'username-sent' : 'username-received';
 
   return (
     <div className={`message ${messageClass}`}>
       <div className="message-content">
-        <p
-          className="message-text"
-          dangerouslySetInnerHTML={{
-            __html: `<span class="${usernameClass}">${username}: </span>${taggedText}`
-          }}
-        />
+        {username && taggedText && (
+          <p
+            className="message-text"
+            dangerouslySetInnerHTML={{
+              __html: `<span class="${usernameClass}">${username}: </span>${taggedText}`
+            }}
+          />
+        )}
       </div>
     </div>
   );
