@@ -27,7 +27,7 @@ const ChatMessage = ({ message }) => {
           const exists = snapshot.exists();
           console.log(`Username: ${username}, Exists: ${exists}`);
           if (exists) {
-            return `<a href="/profile/${uid}" style="color: blue;">@${username}</a>`;
+            return `<a href="/profile/${username}" style="color: blue;">@${username}</a>`;
           } else {
             return `@${username}`;
           }
