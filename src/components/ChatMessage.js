@@ -21,7 +21,7 @@ const ChatMessage = ({ message }) => {
       const matches = text.match(tagRegex);
       if (matches) {
         const replacedMatches = await Promise.all(matches.map(async (match) => {
-          const username = match.substring(1);
+          const username = match.trim().substring(1);
           const userRef = firebase.database().ref(`users`).orderByChild('username').equalTo(username);
           const snapshot = await userRef.once('value');
           const exists = snapshot.exists();
