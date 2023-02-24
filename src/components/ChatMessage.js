@@ -42,7 +42,7 @@ const ChatMessage = ({ message }) => {
     };
 
     fetchUsernameAndTaggedText();
-  }, [uid, text]);
+  }, [uid, text, handleUsernameClick]);
 
   const history = useNavigate();
   const handleUsernameClick = () => {
