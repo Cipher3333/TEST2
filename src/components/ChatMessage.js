@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import firebase from 'firebase/app';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 
-const ChatMessage = ({ message }) => {
+const ChatMessage = ({ message, history }) => {
   const { text, uid } = message;
   const messageClass = uid === firebase.auth().currentUser.uid ? 'sent' : 'received';
 
@@ -28,7 +28,7 @@ const ChatMessage = ({ message }) => {
           const exists = snapshot.exists();
           console.log(`Username: ${username}, Exists: ${exists}`);
           if (exists) {
-            return `<Link to="/profile/${username}" style="color: blue;">@${username}</Link>`;
+            return <Link to={`/profile/${username}`} style={{ color: 'blue' }}>@{username}</Link>;
           } else {
             return `@${username}`;
           }
@@ -44,25 +44,29 @@ const ChatMessage = ({ message }) => {
     fetchUsernameAndTaggedText();
   }, [uid, text]);
 
-  const history = useHistory();
-  const handleUsernameClick = () => {
-    history.push(`/profile/${username}`);
-  };
-
   const usernameClass = messageClass === 'sent' ? 'username-sent' : 'username-received';
+
+  const handleClick = (e) => {
+    e.preventDefault();
+    const username = e.target.textContent.substring(1);
+    history.push(`/profile/${username}`);
+  }
 
   return (
     <div className={`message ${messageClass}`}>
       <div className="message-content">
         {username && taggedText && (
-          <p className="message-text">
-            <span className={usernameClass} onClick={handleUsernameClick}>{username}: </span>
-            <span dangerouslySetInnerHTML={{ __html: taggedText }} />
-          </p>
+          <p
+            className="message-text"
+            onClick={handleClick}
+            dangerouslySetInnerHTML={{
+              __html: `<span class="${usernameClass}">${username}: </span>${taggedText}`
+            }}
+          />
         )}
       </div>
     </div>
   );
 };
 
-export default ChatMessage;
+export default withRouter(ChatMessage);
