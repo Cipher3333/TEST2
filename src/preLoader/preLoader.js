@@ -2,7 +2,7 @@
 //after body is Loaded + 2sec
 
 var preLoader = document.getElementById('pre-Loader')
-var stylesheets = document.getElementsByTagName("link")
+//var stylesheets = document.getElementsByTagName("link")
 
 //function 
 
