@@ -38,7 +38,7 @@ const ChatMessage = ({ message }) => {
         setTaggedText(newTaggedText);
       } else {
         setTaggedText(text);
-      }a
+      }
     };
 
     fetchUsernameAndTaggedText();
