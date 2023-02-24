@@ -9,6 +9,8 @@ const ChatMessage = ({ message }) => {
   const [username, setUsername] = useState(null);
   const [taggedText, setTaggedText] = useState(null);
 
+  const history = useNavigate();
+
   const handleUsernameClick = useCallback(() => {
     history.push(`/profile/${username}`);
   }, [history, username]);
@@ -48,8 +50,6 @@ const ChatMessage = ({ message }) => {
 
     fetchUsernameAndTaggedText();
   }, [uid, text, handleUsernameClick]);
-
-  const history = useNavigate();
 
   const usernameClass = messageClass === 'sent' ? 'username-sent' : 'username-received';
 
