@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import firebase from 'firebase/app';
+import { Link, useHistory } from 'react-router-dom';
 
 const ChatMessage = ({ message }) => {
   const { text, uid } = message;
@@ -17,17 +18,17 @@ const ChatMessage = ({ message }) => {
         setUsername(firebase.auth().displayName);
       }
 
-      const tagRegex = /@([\w\s]+)/g;
+      const tagRegex = /@(\w+)/g;
       const matches = text.match(tagRegex);
       if (matches) {
         const replacedMatches = await Promise.all(matches.map(async (match) => {
-          const username = match.trim().substring(1);
+          const username = match.substring(1);
           const userRef = firebase.database().ref(`users`).orderByChild('username').equalTo(username);
           const snapshot = await userRef.once('value');
           const exists = snapshot.exists();
           console.log(`Username: ${username}, Exists: ${exists}`);
           if (exists) {
-            return `<a href="/profile/${username}" style="color: blue;">@${username}</a>`;
+            return `<Link to="/profile/${username}" style="color: blue;">@${username}</Link>`;
           } else {
             return `@${username}`;
           }
@@ -43,18 +44,21 @@ const ChatMessage = ({ message }) => {
     fetchUsernameAndTaggedText();
   }, [uid, text]);
 
+  const history = useHistory();
+  const handleUsernameClick = () => {
+    history.push(`/profile/${username}`);
+  };
+
   const usernameClass = messageClass === 'sent' ? 'username-sent' : 'username-received';
 
   return (
     <div className={`message ${messageClass}`}>
       <div className="message-content">
         {username && taggedText && (
-          <p
-            className="message-text"
-            dangerouslySetInnerHTML={{
-              __html: `<span class="${usernameClass}">${username}: </span>${taggedText}`
-            }}
-          />
+          <p className="message-text">
+            <span className={usernameClass} onClick={handleUsernameClick}>{username}: </span>
+            <span dangerouslySetInnerHTML={{ __html: taggedText }} />
+          </p>
         )}
       </div>
     </div>
