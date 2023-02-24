@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import firebase from 'firebase/app';
-import { Link, withRouter } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
-const ChatMessage = ({ message, history }) => {
+const ChatMessage = ({ message }) => {
   const { text, uid } = message;
   const messageClass = uid === firebase.auth().currentUser.uid ? 'sent' : 'received';
 
@@ -28,7 +28,7 @@ const ChatMessage = ({ message, history }) => {
           const exists = snapshot.exists();
           console.log(`Username: ${username}, Exists: ${exists}`);
           if (exists) {
-            return <Link to={`/profile/${username}`} style={{ color: 'blue' }}>@{username}</Link>;
+            return <Link to="/profile/${username}" style="color: blue;"><button className="sign-out" onClick={handleUsernameClick}>@${username}</button></Link>;
           } else {
             return `@${username}`;
           }
@@ -38,35 +38,31 @@ const ChatMessage = ({ message, history }) => {
         setTaggedText(newTaggedText);
       } else {
         setTaggedText(text);
-      }
+      }a
     };
 
     fetchUsernameAndTaggedText();
   }, [uid, text]);
 
-  const usernameClass = messageClass === 'sent' ? 'username-sent' : 'username-received';
-
-  const handleClick = (e) => {
-    e.preventDefault();
-    const username = e.target.textContent.substring(1);
+  const history = useNavigate();
+  const handleUsernameClick = () => {
     history.push(`/profile/${username}`);
-  }
+  };
+
+  const usernameClass = messageClass === 'sent' ? 'username-sent' : 'username-received';
 
   return (
     <div className={`message ${messageClass}`}>
       <div className="message-content">
         {username && taggedText && (
-          <p
-            className="message-text"
-            onClick={handleClick}
-            dangerouslySetInnerHTML={{
-              __html: `<span class="${usernameClass}">${username}: </span>${taggedText}`
-            }}
-          />
+          <p className="message-text">
+            <span className={usernameClass} onClick={handleUsernameClick}>{username}: </span>
+            <span dangerouslySetInnerHTML={{ __html: taggedText }} />
+          </p>
         )}
       </div>
     </div>
   );
 };
 
-export default withRouter(ChatMessage);
+export default ChatMessage;
