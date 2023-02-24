@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import firebase from 'firebase/app';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -8,6 +8,11 @@ const ChatMessage = ({ message }) => {
 
   const [username, setUsername] = useState(null);
   const [taggedText, setTaggedText] = useState(null);
+
+  const handleUsernameClick = useCallback(() => {
+    history.push(`/profile/${username}`);
+  }, [history, username]);
+
   useEffect(() => {
     const fetchUsernameAndTaggedText = async () => {
       const usernameSnapshot = await firebase.database().ref(`users/${uid}/username`).once('value');
@@ -28,7 +33,7 @@ const ChatMessage = ({ message }) => {
           const exists = snapshot.exists();
           console.log(`Username: ${username}, Exists: ${exists}`);
           if (exists) {
-            return <Link to="/profile/${username}" style="color: blue;"><button className="sign-out" onClick={handleUsernameClick}>@${username}</button></Link>;
+            return <Link to={`/profile/${username}`} style={{ color: 'blue' }}><button className="sign-out" onClick={handleUsernameClick}>@{username}</button></Link>;
           } else {
             return `@${username}`;
           }
@@ -45,9 +50,6 @@ const ChatMessage = ({ message }) => {
   }, [uid, text, handleUsernameClick]);
 
   const history = useNavigate();
-  const handleUsernameClick = () => {
-    history.push(`/profile/${username}`);
-  };
 
   const usernameClass = messageClass === 'sent' ? 'username-sent' : 'username-received';
 
